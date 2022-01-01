@@ -1,13 +1,27 @@
 import './component.css';
 import image from './LogoKhanaSabkliye-01.png'
 import { useState } from 'react';
+import axios from "axios";
+const dev = 'http://localhost:8000';
+const baseURL = window.location.hostname.split(':')[0] === 'localhost' ? dev : ""
 function Login() {
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
+
     function submitAdmin(e) {
         e.preventDefault();
-        console.log("email", email);
-        console.log("password", password);
+        axios.post(`${baseURL}/api/v1/createadmin`, {
+            email: email,
+            password: password
+        }).then((res) => {
+            // if (res.data.email) {
+            //     alert("login successfull")
+            // }
+            alert("login successfull")
+        }).catch((e) => {
+            alert("login unsuccessfull error found")
+            console.log(e.message)
+        })
     }
     return (
         <section>

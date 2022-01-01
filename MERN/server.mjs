@@ -30,11 +30,50 @@ app.use(
     credentials: true,
   })
 );
-// app.use("/", express.static(path.join(__dirname, "web/build")));
-// app.get("/", (req, res, next) => {
-//   res.sendFile(path.join(__dirname, "./web/build/index.html"));
-//   // res.redirect("/")
-// });
+app.use("/", express.static(path.join(__dirname, "web/build")));
+app.get("/", (req, res, next) => {
+  res.sendFile(path.join(__dirname, "./web/build/index.html"));
+  // res.redirect("/")
+});
+app.post("/api/v1/login", (req, res) => {
+  if (!req.body.email || !req.body.password) {
+    res.status(403).send("required field is missing");
+    return;
+  } else {
+    ADMIN.findOne({ email: req.body.email }, (err, admin) => {
+      if (err) {
+        res.status(500).send("error in getting database");
+      } else if (admin) {
+        varifyHash(req.body.password, admin.password)
+          .then((result) => {
+            if (result) {
+              var token = jwt.sign(
+                {
+                  email: admin.email,
+                },
+                SECRET
+              );
+              res.cookie("token", token, {
+                httpOnly: true,
+                maxAge: 86400000,
+              });
+              res.send({
+                email: admin.email,
+              });
+            } else {
+              res.status(401).send("Authentication Failed");
+            }
+          })
+          .catch((e) => {
+            console.log(e.message);
+          });
+      } else {
+        res.send("user not found");
+      }
+    });
+  }
+});
+// admin created, if later we need to create another admin we will uncomment this API
 app.post("/api/v1/createadmin", (req, res) => {
   ADMIN.findOne({ email: req.body.email }, (err, email) => {
     if (err) {
@@ -60,21 +99,21 @@ app.post("/api/v1/createadmin", (req, res) => {
     }
   });
 });
-// app.use((req, res, next) => {
-//   jwt.verify(req.cookies.token, SECRET, (err, decoded) => {
-//     req.body._decoded = decoded;
+app.use((req, res, next) => {
+  jwt.verify(req.cookies.token, SECRET, (err, decoded) => {
+    req.body._decoded = decoded;
 
-//     if (!err) {
-//       next();
-//     } else {
-//       res.status(401).sendFile(path.join(__dirname, "./web/build/index.html"));
-//     }
-//   });
-// });
-// app.get("/**", (req, res, next) => {
-//   // res.sendFile(path.join(__dirname, "./web/build/index.html"))
-//   res.redirect("/");
-// });
+    if (!err) {
+      next();
+    } else {
+      res.status(401).sendFile(path.join(__dirname, "./web/build/index.html"));
+    }
+  });
+});
+app.get("/**", (req, res, next) => {
+  // res.sendFile(path.join(__dirname, "./web/build/index.html"))
+  res.redirect("/");
+});
 const server = createServer(app);
 
 const io = new Server(server, { cors: { origin: "*", methods: "*" } });
