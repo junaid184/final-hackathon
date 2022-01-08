@@ -74,31 +74,31 @@ app.post("/api/v1/login", (req, res) => {
   }
 });
 // admin created, if later we need to create another admin we will uncomment this API
-app.post("/api/v1/createadmin", (req, res) => {
-  ADMIN.findOne({ email: req.body.email }, (err, email) => {
-    if (err) {
-      res.status(500).send("error in getting database");
-    } else if (email) {
-      res.status(403).send("email already exist");
-    } else {
-      stringToHash(req.body.password)
-        .then((passwordHash) => {
-          console.log("hash: ", passwordHash);
-          let newADMIN = new ADMIN({
-            email: req.body.email,
-            password: passwordHash,
-          });
-          newADMIN.save(() => {
-            console.log("data Saved");
-            res.send("new admin has been created");
-          });
-        })
-        .catch((e) => {
-          console.log(e.message);
-        });
-    }
-  });
-});
+// app.post("/api/v1/createadmin", (req, res) => {
+//   ADMIN.findOne({ email: req.body.email }, (err, email) => {
+//     if (err) {
+//       res.status(500).send("error in getting database");
+//     } else if (email) {
+//       res.status(403).send("email already exist");
+//     } else {
+//       stringToHash(req.body.password)
+//         .then((passwordHash) => {
+//           console.log("hash: ", passwordHash);
+//           let newADMIN = new ADMIN({
+//             email: req.body.email,
+//             password: passwordHash,
+//           });
+//           newADMIN.save(() => {
+//             console.log("data Saved");
+//             res.send("new admin has been created");
+//           });
+//         })
+//         .catch((e) => {
+//           console.log(e.message);
+//         });
+//     }
+//   });
+// });
 app.use((req, res, next) => {
   jwt.verify(req.cookies.token, SECRET, (err, decoded) => {
     req.body._decoded = decoded;

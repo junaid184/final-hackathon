@@ -6,6 +6,7 @@ import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import { Routes, Route, useNavigate } from "react-router-dom";
+import Dashboard from "./Components/dashboard";
 function App() {
   let navigate = useNavigate();
   return (
@@ -29,6 +30,7 @@ function App() {
       </Box>
       <Routes>
         <Route path="/" element={<Login />} />
+        <Route path="/dashboard" element={<Dashboard />} />
       </Routes>
     </div>
   );
