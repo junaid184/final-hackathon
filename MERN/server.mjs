@@ -50,6 +50,7 @@ app.post("/api/v1/login", (req, res) => {
               var token = jwt.sign(
                 {
                   email: admin.email,
+                  _id: admin._id,
                 },
                 SECRET
               );
@@ -59,6 +60,7 @@ app.post("/api/v1/login", (req, res) => {
               });
               res.send({
                 email: admin.email,
+                _id: admin._id,
               });
             } else {
               res.status(401).send("Authentication Failed");
@@ -110,6 +112,32 @@ app.use((req, res, next) => {
     }
   });
 });
+
+app.post("/api/v1/logout", (req, res, next) => {
+  res.cookie("token", "", {
+    httpOnly: true,
+    maxAge: 86400000,
+  });
+  res.send();
+});
+
+app.get("/api/v1/profile", (req, res, next) => {
+  ADMIN.findOne({ email: req.body._decoded.email }, (err, user) => {
+    if (err) {
+      res.status(500).send("error in getting database");
+    } else {
+      if (user) {
+        res.send({
+          email: user.email,
+          _id: user._id,
+        });
+      } else {
+        res.send("user not found");
+      }
+    }
+  });
+});
+
 app.get("/**", (req, res, next) => {
   // res.sendFile(path.join(__dirname, "./web/build/index.html"))
   res.redirect("/");

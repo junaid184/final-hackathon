@@ -1,12 +1,14 @@
 import './component.css';
 import image from './LogoKhanaSabkliye-01.png'
-import Dashboard from './dashboard';
+import { GlobalContext } from '../context/Context';
+import { useContext } from 'react';
 import { useNavigate } from "react-router-dom";
 import { useState } from 'react';
 import axios from "axios";
 const dev = 'http://localhost:8000';
 const baseURL = window.location.hostname.split(':')[0] === 'localhost' ? dev : ""
 function Login() {
+    const { state, dispatch } = useContext(GlobalContext);
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
     let navigate = useNavigate();
@@ -15,12 +17,17 @@ function Login() {
         axios.post(`${baseURL}/api/v1/login`, {
             email: email,
             password: password
-        }).then((res) => {
-            // if (res.data.email) {
-            //     alert("login successfull")
-            // }
-            alert("login successfull");
-            navigate("/dashboard");
+        }, { withCredentials: true }).then((res) => {
+            if (res.data.email) {
+                dispatch({
+                    type: 'USER_LOGIN',
+                    payload: {
+                        email: res.data.email,
+                        _id: res.data._id
+                    }
+                })
+                alert("login success full")
+            }
         }).catch((e) => {
             alert("login unsuccessfull error found")
             console.log(e.message)
